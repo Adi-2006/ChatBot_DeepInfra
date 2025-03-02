@@ -1,0 +1,30 @@
+import OpenAI from "openai";
+
+const openai = new OpenAI({
+  apiKey: import.meta.env.VITE_OPENAI_API_KEY, // API Key (Check if Loaded)
+  dangerouslyAllowBrowser: true, // Risky! Consider a backend proxy
+});
+
+export const fetchBotResponse = async (message) => {
+  try {
+    console.log("User Message:", message);
+
+    const response = await openai.chat.completions.create({
+      model: "gpt-3.5-turbo",
+      messages: [{ role: "user", content: message }],
+      max_tokens: 100,
+      temperature: 0.7,
+    });
+
+    console.log("Full API Response:", response);
+
+    if (!response || !response.choices || !response.choices.length) {
+      throw new Error("Invalid response from OpenAI API");
+    }
+
+    return response.choices[0].message.content.trim();
+  } catch (error) {
+    console.error("Error fetching bot response:", error.response?.data || error.message);
+    return "Sorry, I couldn't process that request.";
+  }
+};
